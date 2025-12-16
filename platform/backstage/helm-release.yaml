@@ -3,8 +3,6 @@ kind: Application
 metadata:
   name: backstage-helm
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "0"
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
@@ -37,6 +35,10 @@ spec:
         
         postgresql:
           enabled: true
+          image:
+            registry: docker.io
+            repository: bitnami/postgresql
+            tag: 16.1.0
           auth:
             password: backstage
           primary:

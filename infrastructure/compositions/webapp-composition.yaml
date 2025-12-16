@@ -6,8 +6,6 @@ metadata:
   name: webapp-kubernetes
   labels:
     provider: kubernetes
-  annotations:
-    argocd.argoproj.io/sync-wave: "3"
 spec:
   compositeTypeRef:
     apiVersion: platform.local/v1alpha1
@@ -24,7 +22,6 @@ spec:
           toFieldPath: metadata.labels[env]
   
   resources:
-    # Namespace
     - name: namespace
       base:
         apiVersion: kubernetes.crossplane.io/v1alpha2
@@ -48,7 +45,6 @@ spec:
           fromFieldPath: spec.forProvider.manifest.metadata.name
           toFieldPath: status.namespace
     
-    # Deployment
     - name: deployment
       base:
         apiVersion: kubernetes.crossplane.io/v1alpha2
@@ -110,7 +106,6 @@ spec:
           fromFieldPath: spec.port
           toFieldPath: spec.forProvider.manifest.spec.template.spec.containers[0].ports[0].containerPort
     
-    # Service
     - name: service
       base:
         apiVersion: kubernetes.crossplane.io/v1alpha2

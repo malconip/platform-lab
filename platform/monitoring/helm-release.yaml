@@ -3,8 +3,6 @@ kind: Application
 metadata:
   name: kube-prometheus-stack
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "0"
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
@@ -15,6 +13,10 @@ spec:
     targetRevision: 57.0.0
     helm:
       values: |
+        # Disable node-exporter - doesn't work on Docker Desktop
+        nodeExporter:
+          enabled: false
+        
         prometheus:
           prometheusSpec:
             retention: 7d
@@ -55,15 +57,6 @@ spec:
             limits:
               cpu: 100m
               memory: 128Mi
-        
-        nodeExporter:
-          resources:
-            requests:
-              cpu: 10m
-              memory: 32Mi
-            limits:
-              cpu: 100m
-              memory: 64Mi
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring

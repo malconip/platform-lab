@@ -12,21 +12,6 @@ Local Kubernetes platform showcasing GitOps, Platform Engineering, and Developer
 | Prometheus + Grafana | Observability | `monitoring` |
 | Sealed Secrets | GitOps-friendly secrets | `kube-system` |
 
-## Architecture
-
-```
-Bootstrap (manual)
-     │
-     └── ArgoCD
-            │
-            ├── ArgoCD (self-managed)
-            ├── Crossplane + Providers
-            ├── Backstage
-            ├── Monitoring Stack
-            ├── Sealed Secrets
-            └── Applications
-```
-
 ## Quick Start
 
 ### Prerequisites
@@ -42,12 +27,35 @@ Bootstrap (manual)
 # Required scopes: repo
 
 export GITHUB_TOKEN=ghp_your_token
-
-# Run bootstrap (idempotent - safe to run multiple times)
 ./bootstrap/install.sh
 ```
 
-### 2. Access Services
+### 2. Wait for Core Components
+
+```bash
+# Check all apps are synced
+kubectl get apps -n argocd
+
+# Wait for Crossplane to be ready
+kubectl wait --for=condition=available --timeout=300s deployment/crossplane -n crossplane-system
+```
+
+### 3. Install Crossplane Providers (manual step)
+
+```bash
+kubectl apply -f platform/crossplane/providers.yaml
+
+# Wait for providers to be healthy
+kubectl get providers
+```
+
+### 4. Install Crossplane XRDs (manual step)
+
+```bash
+kubectl apply -f infrastructure/compositions/
+```
+
+### 5. Access Services
 
 ```bash
 # ArgoCD UI
@@ -63,37 +71,40 @@ kubectl port-forward svc/backstage -n backstage 7007:7007
 # Open: http://localhost:7007
 ```
 
+## Create an App with Crossplane
+
+```bash
+kubectl apply -f infrastructure/claims/demo-webapp.yaml
+
+# Check the created resources
+kubectl get webapps
+kubectl get ns | grep app-
+```
+
 ## Repository Structure
 
 ```
 platform-lab/
-├── bootstrap/              # Manual bootstrap (ArgoCD only)
+├── bootstrap/              # Manual bootstrap
 │   ├── install.sh         # Idempotent bootstrap script
 │   └── root-app.yaml      # App-of-apps entrypoint
 │
-├── platform/              # Platform components (GitOps managed)
-│   ├── apps/              # ApplicationSet definition
-│   ├── argocd/           # ArgoCD self-management
-│   ├── crossplane/       # Crossplane + providers + XRDs
-│   ├── backstage/        # Developer portal
-│   ├── monitoring/       # Prometheus, Grafana
-│   └── sealed-secrets/   # Secrets management
+├── platform/              # ArgoCD managed
+│   ├── apps/              # ApplicationSet
+│   ├── argocd/
+│   ├── crossplane/
+│   ├── backstage/
+│   ├── monitoring/
+│   └── sealed-secrets/
 │
-├── infrastructure/        # Crossplane compositions
-│   ├── compositions/     # XRDs and Compositions
-│   └── claims/          # Infrastructure claims
+├── infrastructure/        # Manual after Crossplane ready
+│   ├── compositions/      # XRDs and Compositions
+│   └── claims/           # Example claims
 │
-├── templates/            # Backstage scaffolder templates
-│
-└── .github/
-    └── workflows/        # CI for images
+└── templates/            # Backstage templates
 ```
 
-## Showcased Skills
+## Known Limitations (Docker Desktop)
 
-- **GitOps**: ArgoCD app-of-apps, self-managed, auto-sync
-- **Platform Engineering**: Crossplane XRDs, Compositions, Claims
-- **Developer Experience**: Backstage catalog, templates, TechDocs
-- **Observability**: Prometheus, Grafana dashboards
-- **Security**: Sealed Secrets, RBAC
-- **CI/CD**: GitHub Actions → GHCR → ArgoCD sync
+- **node-exporter disabled** - doesn't work with Docker Desktop mount system
+- **No persistent volumes by default** - data lost on restart

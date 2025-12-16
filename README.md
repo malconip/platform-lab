@@ -33,62 +33,55 @@ Bootstrap (manual)
 
 - Docker Desktop with Kubernetes enabled
 - kubectl
-- kubeseal CLI
-- GitHub account
+- GitHub Personal Access Token (repo scope)
 
-### 1. Bootstrap ArgoCD
+### 1. Bootstrap
 
 ```bash
-# Run bootstrap script
+# Create GitHub PAT at: https://github.com/settings/tokens
+# Required scopes: repo
+
+export GITHUB_TOKEN=ghp_your_token
+
+# Run bootstrap (idempotent - safe to run multiple times)
 ./bootstrap/install.sh
-
-# Access ArgoCD UI
-kubectl port-forward svc/argocd-server -n argocd 8080:443
-
-# Get admin password
-kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
 ```
 
-### 2. Connect to GitHub
-
-Update `bootstrap/root-app.yaml` with your repo URL, then:
+### 2. Access Services
 
 ```bash
-kubectl apply -f bootstrap/root-app.yaml
+# ArgoCD UI
+kubectl port-forward svc/argocd-server -n argocd 8080:80
+# Open: http://localhost:8080
+
+# Grafana
+kubectl port-forward svc/kube-prometheus-stack-grafana -n monitoring 3000:80
+# Open: http://localhost:3000 (admin / platform-lab)
+
+# Backstage
+kubectl port-forward svc/backstage -n backstage 7007:7007
+# Open: http://localhost:7007
 ```
-
-ArgoCD now manages everything else!
-
-### 3. Access Services
-
-| Service | URL | Credentials |
-|---------|-----|-------------|
-| ArgoCD | https://localhost:8080 | admin / (see above) |
-| Backstage | http://localhost:7007 | - |
-| Grafana | http://localhost:3000 | admin / prom-operator |
 
 ## Repository Structure
 
 ```
 platform-lab/
 ├── bootstrap/              # Manual bootstrap (ArgoCD only)
-│   ├── install.sh
+│   ├── install.sh         # Idempotent bootstrap script
 │   └── root-app.yaml      # App-of-apps entrypoint
 │
 ├── platform/              # Platform components (GitOps managed)
+│   ├── apps/              # ApplicationSet definition
 │   ├── argocd/           # ArgoCD self-management
 │   ├── crossplane/       # Crossplane + providers + XRDs
 │   ├── backstage/        # Developer portal
-│   ├── monitoring/       # Prometheus, Grafana, Loki
+│   ├── monitoring/       # Prometheus, Grafana
 │   └── sealed-secrets/   # Secrets management
 │
 ├── infrastructure/        # Crossplane compositions
 │   ├── compositions/     # XRDs and Compositions
 │   └── claims/          # Infrastructure claims
-│
-├── apps/                 # Application deployments
-│   ├── base/            # Kustomize base
-│   └── overlays/        # dev, staging overlays
 │
 ├── templates/            # Backstage scaffolder templates
 │
@@ -101,6 +94,6 @@ platform-lab/
 - **GitOps**: ArgoCD app-of-apps, self-managed, auto-sync
 - **Platform Engineering**: Crossplane XRDs, Compositions, Claims
 - **Developer Experience**: Backstage catalog, templates, TechDocs
-- **Observability**: Prometheus, Grafana dashboards, Loki logs
+- **Observability**: Prometheus, Grafana dashboards
 - **Security**: Sealed Secrets, RBAC
 - **CI/CD**: GitHub Actions → GHCR → ArgoCD sync

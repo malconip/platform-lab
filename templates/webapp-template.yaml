@@ -72,7 +72,7 @@ spec:
       name: Register in Catalog
       action: catalog:register
       input:
-        catalogInfoUrl: https://github.com/YOUR_USERNAME/platform-lab/blob/main/apps/${{ parameters.name }}/catalog-info.yaml
+        catalogInfoUrl: https://github.com/malconip/platform-lab/blob/master/apps/${{ parameters.name }}/catalog-info.yaml
   
   output:
     links:

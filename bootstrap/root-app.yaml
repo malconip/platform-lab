@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/malconip/platform-lab.git
-    targetRevision: main
+    targetRevision: master
     path: platform/apps
   destination:
     server: https://kubernetes.default.svc

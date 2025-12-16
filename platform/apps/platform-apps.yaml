@@ -50,7 +50,7 @@ spec:
       project: platform
       source:
         repoURL: https://github.com/YOUR_USERNAME/platform-lab.git  # UPDATE THIS
-        targetRevision: main
+        targetRevision: master
         path: '{{path}}'
       destination:
         server: https://kubernetes.default.svc

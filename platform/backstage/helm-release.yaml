@@ -35,8 +35,12 @@ spec:
         
         postgresql:
           enabled: true
+          # Workaround for https://github.com/bitnami/charts/issues/35164
+          # Backstage supports PostgreSQL 17 per docs
           image:
-            tag: "16"
+            registry: docker.io
+            repository: bitnami/postgresql
+            tag: "17"
           auth:
             password: backstage
           primary:

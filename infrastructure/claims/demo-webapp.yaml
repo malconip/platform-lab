@@ -1,0 +1,13 @@
+# Example WebApp Claim
+# Developers create this to get a full application setup
+apiVersion: platform.local/v1alpha1
+kind: WebApp
+metadata:
+  name: demo-app
+  namespace: default
+spec:
+  name: demo
+  image: nginx:alpine
+  replicas: 2
+  port: 80
+  env: dev

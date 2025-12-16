@@ -1,0 +1,53 @@
+# WebApp Composite Resource Definition (XRD)
+# Developers claim a WebApp and get: Namespace, Deployment, Service, Ingress
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xwebapps.platform.local
+spec:
+  group: platform.local
+  names:
+    kind: XWebApp
+    plural: xwebapps
+  claimNames:
+    kind: WebApp
+    plural: webapps
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              required:
+                - name
+                - image
+              properties:
+                name:
+                  type: string
+                  description: Application name
+                image:
+                  type: string
+                  description: Container image
+                replicas:
+                  type: integer
+                  default: 1
+                  description: Number of replicas
+                port:
+                  type: integer
+                  default: 8080
+                  description: Container port
+                env:
+                  type: string
+                  default: dev
+                  description: Environment (dev, staging, prod)
+            status:
+              type: object
+              properties:
+                namespace:
+                  type: string
+                endpoint:
+                  type: string

@@ -1,0 +1,80 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: webapp-template
+  title: Create Web Application
+  description: Create a new web application with Crossplane
+  tags:
+    - crossplane
+    - kubernetes
+    - webapp
+spec:
+  owner: platform-team
+  type: service
+  
+  parameters:
+    - title: Application Details
+      required:
+        - name
+        - image
+      properties:
+        name:
+          title: Application Name
+          type: string
+          description: Unique name for your application
+          pattern: '^[a-z0-9-]+$'
+        image:
+          title: Container Image
+          type: string
+          description: Container image to deploy
+          default: nginx:alpine
+        replicas:
+          title: Replicas
+          type: integer
+          description: Number of replicas
+          default: 1
+          minimum: 1
+          maximum: 5
+        port:
+          title: Container Port
+          type: integer
+          description: Port your application listens on
+          default: 8080
+        env:
+          title: Environment
+          type: string
+          description: Deployment environment
+          enum:
+            - dev
+            - staging
+            - prod
+          default: dev
+  
+  steps:
+    - id: create-claim
+      name: Create Crossplane Claim
+      action: kubernetes:apply
+      input:
+        manifest:
+          apiVersion: platform.local/v1alpha1
+          kind: WebApp
+          metadata:
+            name: ${{ parameters.name }}
+            namespace: default
+          spec:
+            name: ${{ parameters.name }}
+            image: ${{ parameters.image }}
+            replicas: ${{ parameters.replicas }}
+            port: ${{ parameters.port }}
+            env: ${{ parameters.env }}
+    
+    - id: register
+      name: Register in Catalog
+      action: catalog:register
+      input:
+        catalogInfoUrl: https://github.com/YOUR_USERNAME/platform-lab/blob/main/apps/${{ parameters.name }}/catalog-info.yaml
+  
+  output:
+    links:
+      - title: View Application
+        url: /catalog/default/component/${{ parameters.name }}

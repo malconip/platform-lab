@@ -1,0 +1,64 @@
+# App-of-Apps - All platform components
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: platform
+  namespace: argocd
+spec:
+  description: Platform components
+  sourceRepos:
+    - '*'
+  destinations:
+    - namespace: '*'
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: platform-components
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: argocd
+            namespace: argocd
+            path: platform/argocd
+          - name: sealed-secrets
+            namespace: kube-system
+            path: platform/sealed-secrets
+          - name: crossplane
+            namespace: crossplane-system
+            path: platform/crossplane
+          - name: monitoring
+            namespace: monitoring
+            path: platform/monitoring
+          - name: backstage
+            namespace: backstage
+            path: platform/backstage
+          - name: crossplane-xrds
+            namespace: crossplane-system
+            path: infrastructure/compositions
+  template:
+    metadata:
+      name: '{{name}}'
+      namespace: argocd
+    spec:
+      project: platform
+      source:
+        repoURL: https://github.com/YOUR_USERNAME/platform-lab.git  # UPDATE THIS
+        targetRevision: main
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true

@@ -1,0 +1,18 @@
+# Gateway - Entry point for traffic
+# Creates the actual NGINX data plane pod
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: platform-gateway
+  namespace: nginx-gateway
+spec:
+  gatewayClassName: nginx
+  listeners:
+    # HTTP listener for all *.localhost domains
+    - name: http
+      port: 80
+      protocol: HTTP
+      hostname: "*.localhost"
+      allowedRoutes:
+        namespaces:
+          from: All

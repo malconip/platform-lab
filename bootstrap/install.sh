@@ -1,5 +1,5 @@
 #!/bin/bash
-# Bootstrap script - installs ArgoCD and configures GitHub access
+# Bootstrap script - installs ArgoCD, Gateway API CRDs, and configures GitHub access
 # Idempotent - safe to run multiple times
 
 set -euo pipefail
@@ -10,6 +10,7 @@ echo ""
 # Configuration
 GITHUB_REPO="https://github.com/malconip/platform-lab.git"
 GITHUB_USERNAME="malconip"
+GATEWAY_API_VERSION="v1.2.0"
 
 # Check prerequisites
 if ! kubectl cluster-info &>/dev/null; then
@@ -35,6 +36,12 @@ if [ -z "${GITHUB_TOKEN:-}" ]; then
   echo "./bootstrap/install.sh"
   exit 1
 fi
+
+# Install Gateway API CRDs (required before NGINX Gateway Fabric)
+echo "=== Installing Gateway API CRDs (${GATEWAY_API_VERSION}) ==="
+kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/${GATEWAY_API_VERSION}/standard-install.yaml
+echo "Gateway API CRDs installed"
+echo ""
 
 # Install ArgoCD
 echo "=== Installing ArgoCD ==="
@@ -91,7 +98,15 @@ echo "ArgoCD UI: http://localhost:8080"
 echo "Username:  admin"
 echo "Password:  ${ARGO_PASSWORD}"
 echo ""
-echo "Run this to access the UI:"
-echo "kubectl port-forward svc/argocd-server -n argocd 8080:80"
+echo "=== Access Services ==="
+echo ""
+echo "Option 1 - Port Forward:"
+echo "  kubectl port-forward svc/argocd-server -n argocd 8080:80"
+echo ""
+echo "Option 2 - Gateway API (after sync completes):"
+echo "  http://argocd.localhost"
+echo "  http://backstage.localhost"
+echo "  http://grafana.localhost"
+echo "  http://prometheus.localhost"
 echo ""
 echo "ArgoCD will now sync all platform components from GitHub!"

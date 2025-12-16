@@ -24,6 +24,14 @@ spec:
               value: http://localhost:7007
             - name: APP_CONFIG_app_baseUrl
               value: http://localhost:7007
+            - name: POSTGRES_HOST
+              value: postgresql
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_USER
+              value: backstage
+            - name: POSTGRES_PASSWORD
+              value: backstage
           
           resources:
             requests:
@@ -33,22 +41,9 @@ spec:
               cpu: 500m
               memory: 512Mi
         
+        # Disable bitnami postgresql - we deploy our own
         postgresql:
-          enabled: true
-          image:
-            registry: docker.io
-            repository: bitnami/postgresql
-            tag: 17.2.0
-          auth:
-            password: backstage
-          primary:
-            resources:
-              requests:
-                cpu: 50m
-                memory: 128Mi
-              limits:
-                cpu: 200m
-                memory: 256Mi
+          enabled: false
   destination:
     server: https://kubernetes.default.svc
     namespace: backstage

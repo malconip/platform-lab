@@ -27,25 +27,29 @@ spec:
           - name: argocd
             namespace: argocd
             path: platform/argocd
+            wave: "0"
           - name: sealed-secrets
             namespace: kube-system
             path: platform/sealed-secrets
+            wave: "0"
           - name: crossplane
             namespace: crossplane-system
             path: platform/crossplane
+            wave: "1"
           - name: monitoring
             namespace: monitoring
             path: platform/monitoring
+            wave: "1"
           - name: backstage
             namespace: backstage
             path: platform/backstage
-          - name: crossplane-xrds
-            namespace: crossplane-system
-            path: infrastructure/compositions
+            wave: "2"
   template:
     metadata:
       name: '{{name}}'
       namespace: argocd
+      annotations:
+        argocd.argoproj.io/sync-wave: '{{wave}}'
     spec:
       project: platform
       source:
@@ -62,3 +66,36 @@ spec:
         syncOptions:
           - CreateNamespace=true
           - ServerSideApply=true
+---
+# Crossplane XRDs - deployed after Crossplane is ready
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crossplane-xrds
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: platform
+  source:
+    repoURL: https://github.com/malconip/platform-lab.git
+    targetRevision: master
+    path: infrastructure/compositions
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: crossplane-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 5
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 5m
+    syncOptions:
+      - CreateNamespace=true
+      - SkipDryRunOnMissingResource=true

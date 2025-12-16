@@ -1,9 +1,11 @@
 # WebApp Composite Resource Definition (XRD)
-# Developers claim a WebApp and get: Namespace, Deployment, Service, Ingress
+# Developers claim a WebApp and get: Namespace, Deployment, Service
 apiVersion: apiextensions.crossplane.io/v1
 kind: CompositeResourceDefinition
 metadata:
   name: xwebapps.platform.local
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   group: platform.local
   names:

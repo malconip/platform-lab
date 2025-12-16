@@ -6,6 +6,8 @@ metadata:
   name: webapp-kubernetes
   labels:
     provider: kubernetes
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
 spec:
   compositeTypeRef:
     apiVersion: platform.local/v1alpha1

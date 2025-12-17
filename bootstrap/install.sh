@@ -11,6 +11,7 @@ echo ""
 GITHUB_REPO="https://github.com/malconip/platform-lab.git"
 GITHUB_USERNAME="malconip"
 GATEWAY_API_VERSION="v1.2.0"
+NGF_VERSION="v2.2.2"
 
 # Check prerequisites
 if ! kubectl cluster-info &>/dev/null; then
@@ -41,6 +42,12 @@ fi
 echo "=== Installing Gateway API CRDs (${GATEWAY_API_VERSION}) ==="
 kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/${GATEWAY_API_VERSION}/standard-install.yaml
 echo "Gateway API CRDs installed"
+echo ""
+
+# Install NGINX Gateway Fabric CRDs
+echo "=== Installing NGINX Gateway Fabric CRDs (${NGF_VERSION}) ==="
+kubectl apply -f https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/${NGF_VERSION}/deploy/crds.yaml
+echo "NGINX Gateway Fabric CRDs installed"
 echo ""
 
 # Install ArgoCD

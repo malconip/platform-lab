@@ -44,9 +44,9 @@ kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/downloa
 echo "Gateway API CRDs installed"
 echo ""
 
-# Install NGINX Gateway Fabric CRDs
+# Install NGINX Gateway Fabric CRDs (using server-side apply for large CRDs)
 echo "=== Installing NGINX Gateway Fabric CRDs (${NGF_VERSION}) ==="
-kubectl apply -f https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/${NGF_VERSION}/deploy/crds.yaml
+kubectl apply --server-side -f https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/${NGF_VERSION}/deploy/crds.yaml
 echo "NGINX Gateway Fabric CRDs installed"
 echo ""
 

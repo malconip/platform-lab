@@ -5,4 +5,3 @@ namespace: crossplane-system
 
 resources:
   - namespace.yaml
-  - helm-release.yaml

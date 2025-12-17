@@ -30,9 +30,6 @@ spec:
           - name: sealed-secrets
             namespace: kube-system
             path: platform/sealed-secrets
-          - name: crossplane
-            namespace: crossplane-system
-            path: platform/crossplane
           - name: monitoring
             namespace: monitoring
             path: platform/monitoring
@@ -62,6 +59,40 @@ spec:
         syncOptions:
           - CreateNamespace=true
           - ServerSideApply=true
+---
+# Crossplane Helm Chart (standalone)
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: crossplane
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: platform
+  source:
+    repoURL: https://charts.crossplane.io/stable
+    chart: crossplane
+    targetRevision: 1.15.0
+    helm:
+      values: |
+        replicas: 1
+        resourcesCrossplane:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: crossplane-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
 ---
 # Backstage Helm Chart (standalone - uses external PostgreSQL)
 apiVersion: argoproj.io/v1alpha1

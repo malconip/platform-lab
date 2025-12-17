@@ -16,6 +16,8 @@ spec:
         # Disable node-exporter - doesn't work on Docker Desktop
         nodeExporter:
           enabled: false
+        prometheus-node-exporter:
+          enabled: false
         
         prometheus:
           prometheusSpec:

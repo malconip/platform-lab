@@ -10,7 +10,7 @@ Local Kubernetes platform showcasing GitOps, Platform Engineering, and Developer
 | NGINX Gateway Fabric | Gateway API controller | `nginx-gateway` |
 | Crossplane | Infrastructure as Code | `crossplane-system` |
 | Backstage | Internal Developer Portal | `backstage` |
-| Prometheus + Grafana | Observability | `monitoring` |
+| Prometheus + Grafana + AlertManager | Observability | `monitoring` |
 | Sealed Secrets | GitOps-friendly secrets | `kube-system` |
 
 ## Quick Start
@@ -68,13 +68,14 @@ kubectl apply -f infrastructure/compositions/
 kubectl get svc -n nginx-gateway
 
 # Add to /etc/hosts (if needed)
-# 127.0.0.1 argocd.localhost backstage.localhost grafana.localhost prometheus.localhost
+# 127.0.0.1 argocd.localhost backstage.localhost grafana.localhost prometheus.localhost alertmanager.localhost
 
 # Access via:
 # http://argocd.localhost
 # http://backstage.localhost
 # http://grafana.localhost (admin / platform-lab)
 # http://prometheus.localhost
+# http://alertmanager.localhost
 ```
 
 **Option B: Port Forwarding**
@@ -116,13 +117,12 @@ This lab uses the modern **Gateway API** instead of the deprecated Ingress API:
                     │    (Gateway API Controller)       │
                     └─────────────────┬─────────────────┘
                                       │
-          ┌───────────────────────────┼───────────────────────────┐
-          ▼                           ▼                           ▼
-┌─────────────────┐       ┌─────────────────┐       ┌─────────────────┐
-│ argocd.localhost │       │backstage.localhost│       │grafana.localhost│
-│                 │       │                   │       │                 │
-│   ArgoCD UI     │       │    Backstage     │       │     Grafana     │
-└─────────────────┘       └─────────────────┘       └─────────────────┘
+    ┌────────────┬────────────┬────────────┼────────────┬────────────┐
+    ▼            ▼            ▼            ▼            ▼            ▼
+┌────────┐ ┌──────────┐ ┌─────────┐ ┌────────────┐ ┌────────────┐
+│ argocd │ │backstage │ │ grafana │ │ prometheus │ │alertmanager│
+│  :80   │ │  :7007   │ │   :80   │ │   :9090    │ │   :9093    │
+└────────┘ └──────────┘ └─────────┘ └────────────┘ └────────────┘
 ```
 
 ### Why Gateway API?
@@ -156,7 +156,7 @@ platform-lab/
 │   ├── gateway-api/       # NGINX Gateway Fabric + routes
 │   ├── crossplane/        # Crossplane + providers
 │   ├── backstage/         # PostgreSQL infrastructure
-│   ├── monitoring/        # Prometheus + Grafana
+│   ├── monitoring/        # Prometheus + Grafana + AlertManager
 │   └── sealed-secrets/    # Sealed Secrets controller
 │
 ├── infrastructure/        # Manual after Crossplane ready
